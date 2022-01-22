@@ -6,6 +6,8 @@ import pl.projekt.demo.Classes.Todo;
 import pl.projekt.demo.Classes.TodoUser;
 import pl.projekt.demo.Repositories.TodoRepository;
 
+import java.util.List;
+
 @Component
 public class TodoService {
     TodoRepository todoRepository;
@@ -21,5 +23,8 @@ public class TodoService {
         Todo new_todo = new Todo(title,description,owner);
         todoRepository.save(new_todo);
         return "Nowe zadanie zostało pomyślnie dodane";
+    }
+    public List<Todo> getAllTodos(){
+        return todoRepository.findAll();
     }
 }
