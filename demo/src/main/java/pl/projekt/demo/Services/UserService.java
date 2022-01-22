@@ -54,6 +54,9 @@ public class UserService {
                 else if (field.getName().equals("username")){
                     currentUser.setUsername(value.toString());
                 }
+                else if(field.getName().equals("is_logged")){
+                    currentUser.setIs_logged(Boolean.parseBoolean(value.toString()));
+                }
             }
         }
         return currentUser;

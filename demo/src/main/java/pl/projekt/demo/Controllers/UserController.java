@@ -4,6 +4,7 @@ package pl.projekt.demo.Controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import pl.projekt.demo.Classes.CurrentUser;
@@ -28,26 +29,54 @@ public class UserController {
     }
 
     @RequestMapping("/add_new_user")
-    public String addNewUser(){
+    public String addNewUser(HttpSession session, ModelMap modelMap){
+        Object session_current_user = session.getAttribute("current_user");
+        if (session_current_user!=null){
+            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+        }
+        modelMap.addAttribute("current_user",this.currentUser);
+        modelMap.addAttribute("current_page","3");
         return "user/add_new_user";
     }
 
     @RequestMapping(value = "/add_new_user",method = RequestMethod.POST)
-    public String addNewUser(@RequestParam(value="username") String username, @RequestParam(value="password") String password,@RequestParam(value="password_conf") String password_conf){
-
+    public String addNewUser(HttpSession session, ModelMap modelMap,@RequestParam(value="username") String username, @RequestParam(value="password") String password, @RequestParam(value="password_conf") String password_conf){
         if (password.equals(password_conf)){
             userService.addNewUser(username,password);
         }
+        Object session_current_user = session.getAttribute("current_user");
+        if (session_current_user!=null){
+            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+        }
+        modelMap.addAttribute("current_user",this.currentUser);
+        modelMap.addAttribute("current_page","3");
         return "user/add_new_user";
     }
     @RequestMapping("/login_user")
-    public String loginUser(){
+    public String loginUser(HttpSession session, ModelMap modelMap){
+        Object session_current_user = session.getAttribute("current_user");
+        if (session_current_user!=null){
+            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+        }
+        modelMap.addAttribute("current_user",this.currentUser);
+        modelMap.addAttribute("current_page","3");
         return "user/login_user";
     }
     @RequestMapping(value = "/login_user",method = RequestMethod.POST)
-    public RedirectView loginUser(HttpSession session, @RequestParam(value="username") String username, @RequestParam(value="password") String password){
+    public RedirectView loginUser(HttpSession session,ModelMap modelMap, @RequestParam(value="username") String username, @RequestParam(value="password") String password){
         TodoUser user = userService.login_user(username,password);
-        this.currentUser = new CurrentUser(user.getId().toString(),user.getUsername());
+        this.currentUser = new CurrentUser(user.getId().toString(),user.getUsername(),true);
+        session.setAttribute("current_user",this.currentUser);
+        Object session_current_user = session.getAttribute("current_user");
+        if (session_current_user!=null){
+            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+        }
+        modelMap.addAttribute("current_user",this.currentUser);
+        return new RedirectView("/index");
+    }
+    @RequestMapping(value = "/logout_user")
+    public RedirectView logoutUser(HttpSession session){
+        this.currentUser = new CurrentUser("null","null",false);
         session.setAttribute("current_user",this.currentUser);
         return new RedirectView("/index");
     }

@@ -15,7 +15,9 @@ public class TodoService {
     public TodoService(TodoRepository todoRepository){
         this.todoRepository = todoRepository;
     }
-
+    public List<Todo> getTodoByOwnerId(String owner_id){
+        return todoRepository.findByOwnerId(Long.parseLong(owner_id));
+    }
     public Todo getTodo(String todo_id){
         return todoRepository.findById(Long.parseLong(todo_id));
     }

@@ -17,9 +17,6 @@ import java.beans.BeanProperty;
 @SpringBootApplication
 public class DemoApplication {
 
-	@Autowired
-	private JdbcTemplate db;
-
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
