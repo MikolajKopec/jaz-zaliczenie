@@ -26,6 +26,18 @@ public class TodoService {
         todoRepository.save(new_todo);
         return "Nowe zadanie zostało pomyślnie dodane";
     }
+    public String edit_todo(String todo_id,String title,String description){
+        Todo todo = todoRepository.findById(Long.parseLong(todo_id));
+        todo.setTitle(title);
+        todo.setDescription(description);
+        todoRepository.save(todo);
+        return "Zadanie pomyślnie edytowane";
+    }
+    public String delete_todo(String todo_id){
+        Todo todo = todoRepository.findById(Long.parseLong(todo_id));
+        todoRepository.delete(todo);
+        return "Zadanie pomyślnie usunięte";
+    }
     public List<Todo> getAllTodos(){
         return todoRepository.findAll();
     }

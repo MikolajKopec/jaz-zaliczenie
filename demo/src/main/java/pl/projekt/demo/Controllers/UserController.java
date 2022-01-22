@@ -12,7 +12,11 @@ import pl.projekt.demo.Classes.TodoUser;
 import pl.projekt.demo.Services.TodoService;
 import pl.projekt.demo.Services.UserService;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.net.http.HttpResponse;
 
 @Controller
 @Scope("session")
@@ -29,18 +33,21 @@ public class UserController {
     }
 
     @RequestMapping("/add_new_user")
-    public String addNewUser(HttpSession session, ModelMap modelMap){
+    public String addNewUser(HttpSession session, ModelMap modelMap, HttpServletResponse response) throws IOException {
         Object session_current_user = session.getAttribute("current_user");
         if (session_current_user!=null){
             this.currentUser = userService.setCurrentUserFromSession(session_current_user);
         }
         modelMap.addAttribute("current_user",this.currentUser);
         modelMap.addAttribute("current_page","3");
+        if (this.currentUser.is_logged){
+            response.sendRedirect("/index");
+        }
         return "user/add_new_user";
     }
 
     @RequestMapping(value = "/add_new_user",method = RequestMethod.POST)
-    public String addNewUser(HttpSession session, ModelMap modelMap,@RequestParam(value="username") String username, @RequestParam(value="password") String password, @RequestParam(value="password_conf") String password_conf){
+    public RedirectView addNewUser(HttpSession session, ModelMap modelMap,@RequestParam(value="username") String username, @RequestParam(value="password") String password, @RequestParam(value="password_conf") String password_conf){
         if (password.equals(password_conf)){
             userService.addNewUser(username,password);
         }
@@ -50,16 +57,19 @@ public class UserController {
         }
         modelMap.addAttribute("current_user",this.currentUser);
         modelMap.addAttribute("current_page","3");
-        return "user/add_new_user";
+        return new RedirectView("/user/login_user");
     }
     @RequestMapping("/login_user")
-    public String loginUser(HttpSession session, ModelMap modelMap){
+    public String loginUser(HttpSession session, ModelMap modelMap,HttpServletResponse response) throws IOException {
         Object session_current_user = session.getAttribute("current_user");
         if (session_current_user!=null){
             this.currentUser = userService.setCurrentUserFromSession(session_current_user);
         }
         modelMap.addAttribute("current_user",this.currentUser);
         modelMap.addAttribute("current_page","3");
+        if (this.currentUser.is_logged){
+            response.sendRedirect("/index");
+        }
         return "user/login_user";
     }
     @RequestMapping(value = "/login_user",method = RequestMethod.POST)
@@ -76,7 +86,7 @@ public class UserController {
     }
     @RequestMapping(value = "/logout_user")
     public RedirectView logoutUser(HttpSession session){
-        this.currentUser = new CurrentUser("null","null",false);
+        this.currentUser = new CurrentUser(null,null,false);
         session.setAttribute("current_user",this.currentUser);
         return new RedirectView("/index");
     }
