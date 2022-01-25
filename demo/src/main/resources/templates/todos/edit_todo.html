@@ -26,6 +26,7 @@
             <a th:unless="${current_page} == '3'" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Zarządzaj użytkownikiem</a>
             <ul class="dropdown-menu">
                 <a class="nav-link" th:href="@{/user/logout_user}">Wyloguj</a>
+                <a class="nav-link" th:href="@{/user/view_users}">Zobacz / Usuń użytkownika</a>
             </ul>
         </li>
         <li th:case="*" class="nav-item dropdown">

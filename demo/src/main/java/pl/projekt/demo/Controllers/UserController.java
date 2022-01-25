@@ -8,6 +8,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import pl.projekt.demo.Classes.CurrentUser;
+import pl.projekt.demo.Classes.Todo;
 import pl.projekt.demo.Classes.TodoUser;
 import pl.projekt.demo.Exceptions.UserNotFound;
 import pl.projekt.demo.Services.TodoService;
@@ -16,14 +17,16 @@ import pl.projekt.demo.Services.UserService;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @Scope("session")
 @RequestMapping("/user")
 public class UserController {
-    TodoService todoService;
-    UserService userService;
-    CurrentUser currentUser;
+    private TodoService todoService;
+    private UserService userService;
+    private CurrentUser currentUser;
+
     @Autowired
     public UserController(TodoService todoService, UserService userService,CurrentUser currentUser) {
         this.todoService = todoService;
@@ -92,5 +95,28 @@ public class UserController {
         this.currentUser = new CurrentUser(null,null,false);
         session.setAttribute("current_user",this.currentUser);
         return new RedirectView("/index");
+    }
+    @GetMapping("/view_users")
+    public String viewAllUsers(HttpSession session, ModelMap modelMap, HttpServletResponse response) throws IOException {
+        Object session_current_user = session.getAttribute("current_user");
+        if (session_current_user==null){
+            response.sendRedirect("/user/login_user");
+        }
+        else if (!userService.checkIfCurrentUserIsNull(session_current_user)){
+            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+
+            List<TodoUser> users = userService.getAllUsersExceptLogged(this.currentUser.getId());
+            modelMap.addAttribute("users",users);
+        }else {
+            response.sendRedirect("/user/login_user");
+        }
+        modelMap.addAttribute("current_user",this.currentUser);
+        modelMap.addAttribute("current_page","2");
+        return "user/view_users";
+    }
+    @RequestMapping("/delete_user/{user_id}")
+    public void delete_user(@PathVariable String user_id,HttpServletResponse response) throws IOException {
+        userService.deleteUser(user_id);
+        response.sendRedirect("/user/view_users");
     }
 }

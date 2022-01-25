@@ -21,9 +21,9 @@ import java.util.List;
 @Scope("session")
 @RequestMapping("/todo")
 public class TodoController {
-    TodoService todoService;
-    UserService userService;
-    CurrentUser currentUser;
+    private TodoService todoService;
+    private UserService userService;
+    private CurrentUser currentUser;
 
 
     @Autowired
@@ -35,13 +35,20 @@ public class TodoController {
     @GetMapping("/view_todos")
     public String viewAllTodos(HttpSession session, ModelMap modelMap, HttpServletResponse response) throws IOException {
         Object session_current_user = session.getAttribute("current_user");
-        if (!userService.checkIfCurrentUserIsNull(session_current_user)){
-            this.currentUser = userService.setCurrentUserFromSession(session_current_user);
-            List<Todo> todos = todoService.getTodoByOwnerId(this.currentUser.getId());
-            modelMap.addAttribute("todos",todos);
-        }else {
+        if(session_current_user!=null){
+            if (!userService.checkIfCurrentUserIsNull(session_current_user)){
+                this.currentUser = userService.setCurrentUserFromSession(session_current_user);
+                List<Todo> todos = todoService.getTodoByOwnerId(this.currentUser.getId());
+                modelMap.addAttribute("todos",todos);
+            }
+            else {
+                response.sendRedirect("/user/login_user");
+            }
+        }
+        else {
             response.sendRedirect("/user/login_user");
         }
+
         modelMap.addAttribute("current_user",this.currentUser);
         modelMap.addAttribute("current_page","2");
         return "todos/view_todos";

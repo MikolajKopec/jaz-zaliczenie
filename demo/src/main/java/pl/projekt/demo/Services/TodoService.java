@@ -11,10 +11,12 @@ import java.util.List;
 @Component
 public class TodoService {
     TodoRepository todoRepository;
+
     @Autowired
     public TodoService(TodoRepository todoRepository){
         this.todoRepository = todoRepository;
     }
+
     public List<Todo> getTodoByOwnerId(String owner_id){
         return todoRepository.findByOwnerId(Long.parseLong(owner_id));
     }

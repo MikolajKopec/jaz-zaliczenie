@@ -3,16 +3,18 @@ package pl.projekt.demo.Services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.projekt.demo.Classes.CurrentUser;
+import pl.projekt.demo.Classes.Todo;
 import pl.projekt.demo.Classes.TodoUser;
 import pl.projekt.demo.Exceptions.UserNotFound;
 import pl.projekt.demo.Repositories.TodoUserRepository;
 
-import javax.sound.midi.Track;
 import java.lang.reflect.Field;
+import java.util.List;
 
 @Component
 public class UserService {
     TodoUserRepository todoUserRepository;
+
     @Autowired
     public UserService(TodoUserRepository todoUserRepository){
         this.todoUserRepository = todoUserRepository;
@@ -22,6 +24,12 @@ public class UserService {
         return todoUserRepository.findById(Long.parseLong(user_id));
     }
     public TodoUser find_user_by_username(String username){ return todoUserRepository.findByUsername(username);}
+    public List<TodoUser> getAllUsersExceptLogged(String logged_id){
+        TodoUser logged_user = find_user_by_id(logged_id);
+        List<TodoUser> list_of_users = this.todoUserRepository.findAll();
+        list_of_users.remove(logged_user);
+        return list_of_users;
+    }
     public TodoUser login_user(String username,String password) throws UserNotFound {
         TodoUser user = find_user_by_username(username);
         if (user==null){
@@ -38,6 +46,10 @@ public class UserService {
         TodoUser new_user = new TodoUser(username,password);
         todoUserRepository.save(new_user);
         return "Pomyślnie dodano nowego użytkownika";
+    }
+    public void deleteUser(String user_id){
+        TodoUser user = todoUserRepository.findById(Long.parseLong(user_id));
+        todoUserRepository.delete(user);
     }
     public CurrentUser setCurrentUserFromSession(Object session_current_user){
         Object someObject = session_current_user;
