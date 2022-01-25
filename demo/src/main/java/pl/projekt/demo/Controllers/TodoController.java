@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 import pl.projekt.demo.Classes.CurrentUser;
 import pl.projekt.demo.Classes.Todo;
 import pl.projekt.demo.Classes.TodoUser;
@@ -15,9 +14,6 @@ import pl.projekt.demo.Services.UserService;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 
@@ -28,8 +24,10 @@ public class TodoController {
     TodoService todoService;
     UserService userService;
     CurrentUser currentUser;
+
+
     @Autowired
-            public TodoController(TodoService todoService,UserService userService,CurrentUser currentUser){
+    public TodoController(TodoService todoService,UserService userService,CurrentUser currentUser){
         this.todoService = todoService;
         this.userService = userService;
         this.currentUser = currentUser;
@@ -37,7 +35,7 @@ public class TodoController {
     @GetMapping("/view_todos")
     public String viewAllTodos(HttpSession session, ModelMap modelMap, HttpServletResponse response) throws IOException {
         Object session_current_user = session.getAttribute("current_user");
-        if (session_current_user!=null){
+        if (!userService.checkIfCurrentUserIsNull(session_current_user)){
             this.currentUser = userService.setCurrentUserFromSession(session_current_user);
             List<Todo> todos = todoService.getTodoByOwnerId(this.currentUser.getId());
             modelMap.addAttribute("todos",todos);
@@ -80,7 +78,7 @@ public class TodoController {
             response.sendRedirect("/user/login_user");
         }
         Object session_current_user = session.getAttribute("current_user");
-        if (session_current_user!=null){
+        if (!userService.checkIfCurrentUserIsNull(session_current_user)){
             this.currentUser = userService.setCurrentUserFromSession(session_current_user);
             List<Todo> todos = todoService.getTodoByOwnerId(this.currentUser.getId());
             Todo todo= todoService.getTodo(todo_id);

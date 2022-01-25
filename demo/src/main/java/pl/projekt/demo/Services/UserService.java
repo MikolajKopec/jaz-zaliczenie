@@ -4,10 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.projekt.demo.Classes.CurrentUser;
 import pl.projekt.demo.Classes.TodoUser;
+import pl.projekt.demo.Exceptions.UserNotFound;
 import pl.projekt.demo.Repositories.TodoUserRepository;
 
+import javax.sound.midi.Track;
 import java.lang.reflect.Field;
-import java.util.Optional;
 
 @Component
 public class UserService {
@@ -21,14 +22,17 @@ public class UserService {
         return todoUserRepository.findById(Long.parseLong(user_id));
     }
     public TodoUser find_user_by_username(String username){ return todoUserRepository.findByUsername(username);}
-    public TodoUser login_user(String username,String password) throws NullPointerException{
+    public TodoUser login_user(String username,String password) throws UserNotFound {
         TodoUser user = find_user_by_username(username);
-        if (user.getPassword().equals(password)){
+        if (user==null){
+            throw new UserNotFound();
+        }
+         if (user.getPassword().equals(password)){
             return user;
         }
-        else {
-            throw new NullPointerException();
-        }
+         else {
+             throw new UserNotFound();
+         }
     }
     public String addNewUser(String username,String password){
         TodoUser new_user = new TodoUser(username,password);
@@ -39,7 +43,7 @@ public class UserService {
         Object someObject = session_current_user;
         CurrentUser currentUser = new CurrentUser();
         for (Field field : someObject.getClass().getDeclaredFields()) {
-            field.setAccessible(true); // You might want to set modifier to public first.
+            field.setAccessible(true);
             Object value = null;
             try {
                 value = field.get(someObject);
@@ -60,5 +64,24 @@ public class UserService {
             }
         }
         return currentUser;
+    }
+    public Boolean checkIfCurrentUserIsNull(Object session_current_user){
+        Object someObject = session_current_user;
+        for (Field field : someObject.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            Object value = null;
+            try {
+                value = field.get(someObject);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if (value == null) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return null;
     }
 }

@@ -9,14 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import pl.projekt.demo.Classes.CurrentUser;
 import pl.projekt.demo.Classes.TodoUser;
+import pl.projekt.demo.Exceptions.UserNotFound;
 import pl.projekt.demo.Services.TodoService;
 import pl.projekt.demo.Services.UserService;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 
 @Controller
 @Scope("session")
@@ -51,6 +50,9 @@ public class UserController {
         if (password.equals(password_conf)){
             userService.addNewUser(username,password);
         }
+        else {
+            return new RedirectView("/user/add_new_user");
+        }
         Object session_current_user = session.getAttribute("current_user");
         if (session_current_user!=null){
             this.currentUser = userService.setCurrentUserFromSession(session_current_user);
@@ -59,6 +61,7 @@ public class UserController {
         modelMap.addAttribute("current_page","3");
         return new RedirectView("/user/login_user");
     }
+
     @RequestMapping("/login_user")
     public String loginUser(HttpSession session, ModelMap modelMap,HttpServletResponse response) throws IOException {
         Object session_current_user = session.getAttribute("current_user");
@@ -73,7 +76,7 @@ public class UserController {
         return "user/login_user";
     }
     @RequestMapping(value = "/login_user",method = RequestMethod.POST)
-    public RedirectView loginUser(HttpSession session,ModelMap modelMap, @RequestParam(value="username") String username, @RequestParam(value="password") String password){
+    public RedirectView loginUser(HttpSession session,ModelMap modelMap, @RequestParam(value="username") String username, @RequestParam(value="password") String password) throws UserNotFound {
         TodoUser user = userService.login_user(username,password);
         this.currentUser = new CurrentUser(user.getId().toString(),user.getUsername(),true);
         session.setAttribute("current_user",this.currentUser);
